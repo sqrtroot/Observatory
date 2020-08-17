@@ -1,0 +1,15 @@
+[Unit]
+Description=Stellarium Display Manager
+
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+
+After=systemd-user-sessions.service plymouth-start.service
+# OnFailure=plymouth-quit.service
+
+[Service]
+ExecStart=/usr/bin/startx /etc/X11/xinit/stellarium.xinit -- -nocursor
+User=stellarium
+
+[Install]
+Alias=display-manager.service

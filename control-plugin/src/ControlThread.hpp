@@ -15,7 +15,7 @@
 
 namespace fs = std::filesystem;
 class ControlThread : public QThread {
-  fs::path          fifoPath;
+  static constexpr const char * fifoPath = "/tmp/stellariumControl";
   std::atomic<bool> running = false;
 
 public:

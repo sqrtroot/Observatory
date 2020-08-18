@@ -3,7 +3,6 @@
 #include <StelCore.hpp>
 #include <StelModuleMgr.hpp>
 #include <StelPainter.hpp>
-#include <gpiod.hpp>
 
 StelModule *ControlPluginInterface::getStelModule() const {
   return new ControlPlugin();

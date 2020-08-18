@@ -1,4 +1,4 @@
 xset s off
 xset -dpms
 xset s noblank
-exec /usr/bin/stellarium -f
+exec /usr/local/bin/stellarium

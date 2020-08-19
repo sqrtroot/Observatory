@@ -41,28 +41,28 @@ sudo -u stellarium touch /home/stellarium/.hushlogin
 # ___) | ||  __/ | | (_| | |  | | |_| | | | | | |
 #|____/ \__\___|_|_|\__,_|_|  |_|\__,_|_| |_| |_|
                                                 
-#sudo -u `stat -c "%U" .` bash << EOF
-#git submodule update --depth=1 --recursive
-#mkdir -p stellarium/build/unix
-#cd stellarium/build/unix
-#cmake ../.. \
-#-DUSE_PLUGIN_TELESCOPECONTROL:BOOL="0" \
-#-DUSE_PLUGIN_COMPASSMARKS:BOOL="0" \
-#-DUSE_PLUGIN_ANGLEMEASURE:BOOL="0" \
-#-DUSE_PLUGIN_POINTERCOORDINATES:BOOL="0" \
-#-DCMAKE_BUILD_TYPE:STRING="Release" \
-#-DUSE_PLUGIN_OCULARS:BOOL="0" \
-#-DUSE_PLUGIN_EXOPLANETS:BOOL="0" \
-#-DUSE_PLUGIN_OCULUS:BOOL="0" \
-#-DUSE_PLUGIN_ARCHAEOLINES:BOOL="0" \
-#-DUSE_PLUGIN_TEXTUSERINTERFACE:BOOL="0" \
-#-DENABLE_GPS:BOOL="0" \
-#-DUSE_PLUGIN_EQUATIONOFTIME:BOOL="1"
-#make -j $(nproc)
-#EOF
-#cd stellarium/build/unix
-#make install
-#cd $SCRIPTPATH
+sudo -u `stat -c "%U" .` bash << EOF
+git submodule update --depth=1 --recursive
+mkdir -p stellarium/build/unix
+cd stellarium/build/unix
+cmake ../.. \
+-DUSE_PLUGIN_TELESCOPECONTROL:BOOL="0" \
+-DUSE_PLUGIN_COMPASSMARKS:BOOL="0" \
+-DUSE_PLUGIN_ANGLEMEASURE:BOOL="0" \
+-DUSE_PLUGIN_POINTERCOORDINATES:BOOL="0" \
+-DCMAKE_BUILD_TYPE:STRING="Release" \
+-DUSE_PLUGIN_OCULARS:BOOL="0" \
+-DUSE_PLUGIN_EXOPLANETS:BOOL="0" \
+-DUSE_PLUGIN_OCULUS:BOOL="0" \
+-DUSE_PLUGIN_ARCHAEOLINES:BOOL="0" \
+-DUSE_PLUGIN_TEXTUSERINTERFACE:BOOL="0" \
+-DENABLE_GPS:BOOL="0" \
+-DUSE_PLUGIN_EQUATIONOFTIME:BOOL="1"
+make -j $(nproc)
+EOF
+cd stellarium/build/unix
+make install
+cd $SCRIPTPATH
 
 #                 _             _             _             _       
 #  ___ ___  _ __ | |_ _ __ ___ | |      _ __ | |_   _  __ _(_)_ __  
@@ -110,5 +110,10 @@ EOF
 echo Stellar > /etc/issue
 echo Stellar > /etc/issue.net
 echo > /etc/motd
+if ! grep disable_splash=1 /boot/config.txt; then
+	echo "disable_splash=1" >> /boot/config.txt
+fi
+if ! grep logo.nologo /boot/cmdline.txt; then
+	sed -i '$s/$/ logo.nologo/' /boot/cmdline.txt
+fi
 
-reboot

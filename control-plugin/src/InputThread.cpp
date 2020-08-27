@@ -13,20 +13,26 @@ InputThread::InputThread():
     stateContext{StelApp::getInstance().getCore(),
                  StelApp::getInstance().getCore()->getMovementMgr()},
     statemachine(make_sm(stateContext)),
-    turning_timeout(this) {
+    turning_timeout() {
   qDebug() << "Constructed InputThread";
 
-  turning_timeout.setSingleShot(true);
-  turning_timeout.setInterval(50);
-  connect(&turning_timeout, &QTimer::timeout, [&](){
+
+}
+void InputThread::init_turning_timeout() {
+  qDebug() << "Making thread turning timer";
+  turning_timeout = std::make_unique<QTimer>(this);
+
+  turning_timeout->setSingleShot(true);
+  turning_timeout->setInterval(50);
+
+  connect(turning_timeout.get(), &QTimer::timeout, [&](){
     statemachine.process_event(ControlSMEvents::RotateTimeout{});
   });
-  turning_timeout.start();
-
 }
 void InputThread::run() {
   using namespace ControlSMEvents;
   qDebug() << "Starting input thread";
+  init_turning_timeout();
   running      = true;
   auto chip    = gpiod::chip("gpiochip0");
   auto buttons = chip.get_lines({26, 19, 21});
@@ -63,4 +69,3 @@ void InputThread::run() {
 void InputThread::stop() {
   running = false;
 }
-

@@ -2,7 +2,6 @@
 #include "InputThread.hpp"
 #include "gui/ControlPluginSettingsWindow.hpp"
 #include <QFont>
-#include <QThread>
 #include <QObject>
 #include <StelModule.hpp>
 #include <StelPluginInterface.hpp>
@@ -11,7 +10,6 @@
 class ControlPlugin : public StelModule {
   Q_OBJECT
   InputThread ct;
-  QThread inputThread;
 
 public:
   ControlPlugin();

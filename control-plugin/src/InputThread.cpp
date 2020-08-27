@@ -12,25 +12,20 @@ static const gpiod::line_request LINE_REQUEST_INPUT{
 InputThread::InputThread():
     stateContext{StelApp::getInstance().getCore(),
                  StelApp::getInstance().getCore()->getMovementMgr()},
-    statemachine(make_sm(stateContext)) {
+    statemachine(make_sm(stateContext)),
+    turning_timeout(this) {
   qDebug() << "Constructed InputThread";
-
-
+  turning_timeout.setSingleShot(true);
+  turning_timeout.setInterval(50);
+  //  const auto cb_f = [&](){
+  //    statemachine.process_event(ControlSMEvents::RotateTimeout{});
+  //  };
+  //  connect(&turning_timeout, &QTimer::timeout, cb_f);
 }
 void InputThread::run() {
   using namespace ControlSMEvents;
   qDebug() << "Starting input thread";
 
-  QTimer turning_timeout(this);
-  turning_timeout.setSingleShot(true);
-  turning_timeout.setInterval(50);
-  const auto cb_f = [&](){
-    statemachine.process_event(ControlSMEvents::RotateTimeout{});
-  };
-  connect(&turning_timeout, &QTimer::timeout, cb_f);
-  turning_timeout.start();
-
-  running      = true;
 
   auto chip    = gpiod::chip("gpiochip0");
   auto buttons = chip.get_lines({26, 19, 21});
@@ -62,9 +57,5 @@ void InputThread::run() {
       }
     }
   }
-  qDebug() << "Ending thread";
 }
 
-void InputThread::stop() {
-  running = false;
-}

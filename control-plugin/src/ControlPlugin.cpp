@@ -27,12 +27,14 @@ ControlPlugin::ControlPlugin():
 }
 
 void ControlPlugin::init() {
-  ct.start();
   qDebug() << "Initializing Control plugin";
+  ct.moveToThread(&inputThread);
+  inputThread.start();
 }
 void ControlPlugin::deinit() {
-  ct.stop();
   StelModule::deinit();
+  inputThread.quit();
+  inputThread.wait();
 }
 
 double ControlPlugin::getCallOrder(StelModule::StelModuleActionName actionName) const {

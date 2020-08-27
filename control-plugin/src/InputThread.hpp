@@ -17,7 +17,6 @@ class InputThread : public QThread {
 
 public:
   InputThread();
-  void start();
   void stop();
 
 protected:

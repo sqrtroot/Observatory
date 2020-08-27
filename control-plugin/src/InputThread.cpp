@@ -24,9 +24,10 @@ void InputThread::run() {
   QTimer turning_timeout(this);
   turning_timeout.setSingleShot(true);
   turning_timeout.setInterval(50);
-  connect(&turning_timeout, &QTimer::timeout, [&](){
+  const auto cb_f = [&](){
     statemachine.process_event(ControlSMEvents::RotateTimeout{});
-  });
+  };
+  connect(&turning_timeout, &QTimer::timeout, cb_f);
   turning_timeout.start();
 
   running      = true;
@@ -62,10 +63,6 @@ void InputThread::run() {
     }
   }
   qDebug() << "Ending thread";
-}
-
-void InputThread::start() {
-  QThread::start();
 }
 
 void InputThread::stop() {

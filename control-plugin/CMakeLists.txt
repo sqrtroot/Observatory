@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(control_plugin)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
@@ -19,12 +19,15 @@ target_sources(control_plugin
         src/ControlPlugin.hpp
         src/ControlThread.cpp
         src/ControlThread.hpp
+        src/StateMachine.cpp
+        src/StateMachine.hpp
 	src/gui/controlPluginSettingsWindow.ui
         )
 
 target_include_directories(
         control_plugin
         PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_BINARY_DIR} #needed for qt
         ${STELLARIUM_SOURCE_DIR}/src
         ${STELLARIUM_SOURCE_DIR}/src/core
@@ -42,7 +45,7 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}/src
 )
 
-target_link_libraries(control_plugin Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(control_plugin Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL gpiod gpiodcxx)
 target_compile_definitions(control_plugin PUBLIC QT_DYNAMICPLUGIN)
 set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOMOC TRUE)
 set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOUIC TRUE)

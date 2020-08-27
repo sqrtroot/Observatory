@@ -12,11 +12,14 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "StateMachine.hpp"
 
 namespace fs = std::filesystem;
 class ControlThread : public QThread {
-  static constexpr const char * fifoPath = "/tmp/stellariumControl";
   std::atomic<bool> running = false;
+
+  ControlSMContext stateContext;
+  ControlSM_t statemachine;
 
 public:
   ControlThread();

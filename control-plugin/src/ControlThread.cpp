@@ -1,42 +1,50 @@
 #include "ControlThread.hpp"
+#include <chrono>
 #include <StelApp.hpp>
 #include <StelCore.hpp>
 #include <StelMovementMgr.hpp>
 #include <unistd.h>
+#include <gpiod.hpp>
 
-ControlThread::ControlThread(){
-  if(access(fifoPath, F_OK) == -1) {
-    if(mkfifo(fifoPath, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP | S_IROTH) != 0) {
-      throw std::runtime_error("Couldn't create fifo");
-    }
-  }
+static const gpiod::line_request LINE_REQUEST_INPUT{ "ControlThread",gpiod::line_request::EVENT_BOTH_EDGES };
+
+ControlThread::ControlThread() : stateContext{StelApp::getInstance().getCore(), StelApp::getInstance().getCore()->getMovementMgr()}, statemachine(make_sm(stateContext)){
   qDebug() << "Constructed ControlThread";
 }
 void ControlThread::run() {
+  using namespace ControlSMEvents;
   qDebug() << "Starting control thread";
   running = true;
-  std::ifstream fifo(fifoPath);
-  auto          stelCore        = StelApp::getInstance().getCore();
-  auto          stelMovementMgr = stelCore->getMovementMgr();
-  while(running) {
-    std::string input;
-    std::getline(fifo, input);
-    if(input == "ZoomIn") {
-      auto fov = stelMovementMgr->getAimFov();
-      stelMovementMgr->zoomTo(fov - (fov / 10), 1.);
-    } else if(input == "ZoomOut") {
-      auto fov = stelMovementMgr->getAimFov();
-      stelMovementMgr->zoomTo(fov + (fov / 10), 1.);
-    } else if(input == "Home") {
-      stelMovementMgr->setViewDirectionJ2000(stelCore->altAzToJ2000(
-        stelMovementMgr->getInitViewingDirection()));
-      stelMovementMgr->zoomTo(stelMovementMgr->getInitFov(), .1);
-    } else if(input == "SetHome") {
-      stelMovementMgr->setInitFov(stelMovementMgr->getAimFov());
-      stelMovementMgr->setInitViewDirectionToCurrent();
-    }
-    if(fifo.eof()) {
-      fifo.clear();
+  auto chip = gpiod::chip("gpiochip0");
+  auto buttons = chip.get_lines({26,19, 21});
+  buttons.request(LINE_REQUEST_INPUT);
+  while(true){
+    auto event_lines = buttons.event_wait(std::chrono::nanoseconds(5));
+    if(event_lines){
+      for(const auto & line : event_lines){
+        if(line == buttons[0]){
+	        auto event = line.event_read();
+          if (event.event_type == gpiod::line_event::RISING_EDGE){
+            statemachine.process_event(RotateRight{});
+            
+          }else{
+            statemachine.process_event(RotateTimeout{});
+          }
+        }else if(line == buttons[1]){
+	        auto event = line.event_read();
+          if (event.event_type == gpiod::line_event::RISING_EDGE){
+            statemachine.process_event(RotateLeft{});
+            
+          }else{
+            statemachine.process_event(RotateTimeout{});
+          }
+        }else if(line == buttons[2]){
+	        auto event = line.event_read();
+          if (event.event_type == gpiod::line_event::RISING_EDGE){
+            statemachine.process_event(ButtonPress{});
+          }
+        }
+      }
     }
   }
   qDebug() << "Ending thread";

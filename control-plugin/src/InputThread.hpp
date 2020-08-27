@@ -8,7 +8,6 @@
 #include <QThread>
 #include <QTimer>
 #include <atomic>
-#include <memory>
 
 class InputThread : public QThread {
   std::atomic<bool> running = false;
@@ -16,11 +15,11 @@ class InputThread : public QThread {
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
 
-  std::unique_ptr<QTimer> turning_timeout;
-  void init_turning_timeout();
+  QTimer turning_timeout;
 
 public:
   InputThread();
+  void start();
   void stop();
 
 protected:

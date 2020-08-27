@@ -1,6 +1,5 @@
 #!/bin/bash
-echo start
-read -t 1 -N 1 input
+read -t 2 -N 1 input
 echo $input
 if [[ $input == "s" ]]; then
 	/bin/bash

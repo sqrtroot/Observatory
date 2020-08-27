@@ -16,7 +16,18 @@ figlet Software
 #|____/ \___/|_|  \__| \_/\_/ \__,_|_|  \___|
 
 apt update
-apt install -y stellarium cmake gcc qt5-default  libqt5serialport5-dev qtscript5-dev qtmultimedia5-dev qtpositioning5-dev qttools5-dev libdrm-dev
+apt install -y \
+	cmake \
+	gcc \
+	qt5-default  \
+	libqt5serialport5-dev \
+	qtscript5-dev \
+	qtmultimedia5-dev \
+	qtpositioning5-dev \
+	qttools5-dev \
+	libdrm-dev \
+	libgpiod-dev \
+	gpiod
 }
 
 user(){
@@ -47,8 +58,10 @@ figlet Stellarium
                                                 
 sudo -u `stat -c "%U" .` bash << EOF
 git submodule update --depth=1 --recursive
-mkdir -p stellarium/build/unix
-cd stellarium/build/unix
+cd stellarium
+git apply ../stellarium.patch
+mkdir -p build/unix
+cd build/unix
 cmake ../.. \
 -DUSE_PLUGIN_TELESCOPECONTROL:BOOL="0" \
 -DUSE_PLUGIN_COMPASSMARKS:BOOL="0" \
@@ -115,16 +128,46 @@ cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf << EOF
 ExecStart=
 ExecStart=-/sbin/agetty --autologin stellarium --skip-login --noclear %I \$TERM
 EOF
-echo Stellar > /etc/issue
-echo Stellar > /etc/issue.net
-echo > /etc/motd
-if ! grep disable_splash=1 /boot/config.txt; then
+printf "" > /etc/issue
+printf "" > /etc/issue.net
+printf "" > /etc/motd
+if ! grep -q "^disable_splash=1" /boot/config.txt; then
 	echo "disable_splash=1" >> /boot/config.txt
 fi
-if ! grep logo.nologo /boot/cmdline.txt; then
+if ! grep -q logo.nologo /boot/cmdline.txt; then
 	sed -i '$s/$/ logo.nologo/' /boot/cmdline.txt
 fi
+if ! grep -q vt.global_cursor_default=0 /boot/cmdline.txt; then
+	sed -i '$s/$/ vt.global_cursor_default=0/' /boot/cmdline.txt
+fi
+
+cp -r stellarium_plymouth_theme /usr/share/plymouth/themes/stellarium/
+cat > /etc/plymouth/plymouthd.conf << EOF
+[Daemon]
+Theme=stellarium
+ShowDelay=5
+EOF
+update-initramfs -u
 }
+
+rtc(){
+figlet rtc
+
+#      _       
+# _ __| |_ ___ 
+#| '__| __/ __|
+#| |  | || (__ 
+#|_|   \__\___|
+              	
+if ! grep -q "^dtparam=i2c_arm=on" /boot/config.txt; then
+	echo "^dtparam=i2c_arm=on" >> /boot/config.txt
+fi
+if ! grep -q "^i2c-dev" /etc/modules; then
+	echo i2c-dev >> /etc/modules
+fi
+}
+
+
 
 all(){
 	software
@@ -132,6 +175,7 @@ all(){
 	stellarium
 	control-plugin
 	startup
+	rtc
 }
 
 if [[ $# -eq 0 ]]; then

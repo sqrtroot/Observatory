@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=pix
+Description=Stellarium Splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/stellarium
+ScriptFile=/usr/share/plymouth/themes/stellarium/stellarium.script

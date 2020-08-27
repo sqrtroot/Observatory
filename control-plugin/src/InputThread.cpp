@@ -12,10 +12,16 @@ static const gpiod::line_request LINE_REQUEST_INPUT{
 InputThread::InputThread():
     stateContext{StelApp::getInstance().getCore(),
                  StelApp::getInstance().getCore()->getMovementMgr()},
-    statemachine(make_sm(stateContext)),
-    turning_timeout(this) {
+    statemachine(make_sm(stateContext)) {
   qDebug() << "Constructed InputThread";
 
+
+}
+void InputThread::run() {
+  using namespace ControlSMEvents;
+  qDebug() << "Starting input thread";
+
+  QTimer turning_timeout(this);
   turning_timeout.setSingleShot(true);
   turning_timeout.setInterval(50);
   connect(&turning_timeout, &QTimer::timeout, [&](){
@@ -23,14 +29,12 @@ InputThread::InputThread():
   });
   turning_timeout.start();
 
-}
-void InputThread::run() {
-  using namespace ControlSMEvents;
-  qDebug() << "Starting input thread";
   running      = true;
+
   auto chip    = gpiod::chip("gpiochip0");
   auto buttons = chip.get_lines({26, 19, 21});
   buttons.request(LINE_REQUEST_INPUT);
+
   while(true) {
     auto event_lines = buttons.event_wait(std::chrono::nanoseconds(5));
     if(event_lines) {
@@ -62,7 +66,6 @@ void InputThread::run() {
 
 void InputThread::start() {
   QThread::start();
-  turning_timeout.moveToThread(this->thread());
 }
 
 void InputThread::stop() {

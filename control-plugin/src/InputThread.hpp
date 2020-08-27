@@ -15,8 +15,6 @@ class InputThread : public QThread {
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
 
-  QTimer turning_timeout;
-
 public:
   InputThread();
   void start();

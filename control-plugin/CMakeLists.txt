@@ -17,8 +17,8 @@ target_sources(control_plugin
         src/gui/ControlPluginSettingsWindow.hpp
         src/ControlPlugin.cpp
         src/ControlPlugin.hpp
-        src/ControlThread.cpp
-        src/ControlThread.hpp
+		src/InputThread.cpp
+		src/InputThread.hpp
         src/StateMachine.cpp
         src/StateMachine.hpp
 	src/gui/controlPluginSettingsWindow.ui

@@ -1,17 +1,19 @@
 #pragma once
 #include "QtSMLLogger.hpp"
-#include <StelMovementMgr.hpp>
 #include <StelCore.hpp>
+#include <StelMovementMgr.hpp>
 #include <boost/sml.hpp>
 #include <queue>
 
-#define nothing [](){}
+#define nothing \
+  []() {        \
+  }
 
 namespace sml = boost::sml;
 
 struct ControlSMContext {
-  StelCore* stelCore;
-  StelMovementMgr *stelMovementMgr;
+  StelCore*        stelCore;
+  StelMovementMgr* stelMovementMgr;
 };
 
 namespace ControlSMEvents {
@@ -20,14 +22,14 @@ struct RotateLeft {};
 struct RotateRight {};
 struct RotateTimeout {};
 struct ReturnFromSub {};
-} // namespace ControlSMEvents
+}    // namespace ControlSMEvents
 
 struct DateTimeControl {
   auto operator()() const {
     using namespace sml;
     using namespace ControlSMEvents;
 
-    /**
+    /*
      * Initial state: *year_control
      * Transition DSL: src_state + event [ guard ] / action = dst_state
      */
@@ -58,19 +60,18 @@ struct DateTimeControl {
 };
 
 struct ControlSM {
-
   auto operator()() const {
     using namespace sml;
     using namespace ControlSMEvents;
 
-    constexpr auto stop_zooming = [](ControlSMContext &sc) {
+    constexpr auto stop_zooming = [](ControlSMContext& sc) {
       sc.stelMovementMgr->zoomIn(false);
       sc.stelMovementMgr->zoomOut(false);
     };
-    constexpr auto zoom_in = [](ControlSMContext &sc) {
+    constexpr auto zoom_in = [](ControlSMContext& sc) {
       sc.stelMovementMgr->zoomIn(true);
     };
-    constexpr auto zoom_out = [](ControlSMContext &sc) {
+    constexpr auto zoom_out = [](ControlSMContext& sc) {
       sc.stelMovementMgr->zoomOut(true);
     };
 
@@ -99,6 +100,6 @@ struct ControlSM {
   }
 };
 
-using ControlSM_t = sml::sm<ControlSM, sml::process_queue<std::queue>,
-                            sml::logger<QtSMLLogger>>;
+using ControlSM_t =
+  sml::sm<ControlSM, sml::process_queue<std::queue>, sml::logger<QtSMLLogger>>;
 ControlSM_t make_sm(ControlSMContext& csmc);

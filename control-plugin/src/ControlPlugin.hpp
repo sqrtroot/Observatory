@@ -1,5 +1,5 @@
 #pragma once
-#include "ControlThread.hpp"
+#include "InputThread.hpp"
 #include "gui/ControlPluginSettingsWindow.hpp"
 #include <QFont>
 #include <QObject>
@@ -9,7 +9,7 @@
 
 class ControlPlugin : public StelModule {
   Q_OBJECT
-  ControlThread ct;
+  InputThread ct;
 
 public:
   ControlPlugin();

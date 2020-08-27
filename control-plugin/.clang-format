@@ -46,7 +46,7 @@ PenaltyBreakBeforeFirstCallParameter: '5'
 PenaltyBreakFirstLessLess: '5'
 PenaltyExcessCharacter: '1'
 PenaltyReturnTypeOnItsOwnLine: '20'
-PointerAlignment: Right
+PointerAlignment: Left
 ReflowComments: 'true'
 SortIncludes: 'true'
 SortUsingDeclarations: 'true'

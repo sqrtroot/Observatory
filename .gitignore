@@ -1,2 +1,4 @@
 control-plugin/build
+control-plugin/cmake-build-debug
+control-plugin/.idea
 stellarium/*

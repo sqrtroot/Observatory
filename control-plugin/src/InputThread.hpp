@@ -5,8 +5,10 @@
 #ifndef CONTROL_PLUGIN_INPUTTHREAD_HPP
 #define CONTROL_PLUGIN_INPUTTHREAD_HPP
 #include "StateMachine.hpp"
+#include <chrono>
 #include <QThread>
-#include <QTimer>
+#include <QBasicTimer>
+#include <QEventLoop> 
 #include <atomic>
 
 class InputThread : public QThread {
@@ -14,6 +16,11 @@ class InputThread : public QThread {
 
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
+
+  bool inputTimerOn = false;
+  using clock = std::chrono::high_resolution_clock;
+  decltype(clock::now()) lastInputTimestamp;
+  static constexpr auto stopDelay = std::chrono::seconds(1);
 
 public:
   InputThread();

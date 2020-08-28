@@ -4,7 +4,10 @@
 #include <QFont>
 #include <QObject>
 #include <StelModule.hpp>
+#include <StelGui.hpp>
+#include <StelGuiItems.hpp>
 #include <StelPluginInterface.hpp>
+#include <QProcess>
 #include <memory>
 
 class ControlPlugin : public StelModule {
@@ -22,8 +25,14 @@ public:
   bool   configureGui(bool show) override;
   void   update(double delta) override;
 
+public slots:
+  void showWifiSettings();
+
 private:
   std::unique_ptr<ControlPluginSettingsWindow> window;
+  std::unique_ptr<StelButton> wifiButton;
+  QProcess qProcess;
+  void                                         initWifiButton();
 };
 
 class ControlPluginInterface : public QObject, public StelPluginInterface {

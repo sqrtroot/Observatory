@@ -1,10 +1,13 @@
 #include "ControlPlugin.hpp"
 #include <QComboBox>
+#include <QProcess>
 #include <StelCore.hpp>
+#include <QApplication>
+#include <StelGuiItems.hpp>
 #include <StelModuleMgr.hpp>
 #include <StelPainter.hpp>
 
-StelModule *ControlPluginInterface::getStelModule() const {
+StelModule* ControlPluginInterface::getStelModule() const {
   return new ControlPlugin();
 }
 
@@ -29,9 +32,36 @@ ControlPlugin::ControlPlugin():
 void ControlPlugin::init() {
   ct.start();
   qDebug() << "Initializing Control plugin";
+  initWifiButton();
 }
+
+void ControlPlugin::initWifiButton() {
+  auto wifiAction = addAction("action_Show_Wifi_Settings",
+                              "Show Wifi Settings",
+                              "Show Wifi Settings",
+                              "showWifiSettings()",
+                              "Ctrl+w");
+  try {
+    auto gui = dynamic_cast<StelGui*>(StelApp::getInstance().getGui());
+
+    if(gui != Q_NULLPTR) {
+      wifiButton =
+        std::make_unique<StelButton>(nullptr,
+                                     QPixmap(":/control-plugin/wifi-button.png"),
+                                     QPixmap(":/control-plugin/wifi-button.png"),
+                                     QPixmap(),
+                                     wifiAction);
+      gui->getButtonBar()->addButton(wifiButton.get(), "065-pluginsGroup");
+    }
+  } catch(std::runtime_error& e) {
+    qWarning() << "WARNING: unable create toolbar button for AngleMeasure plugin: "
+               << e.what();
+  }
+}
+
 void ControlPlugin::deinit() {
   ct.stop();
+  qProcess.kill();
   StelModule::deinit();
 }
 
@@ -45,3 +75,16 @@ bool ControlPlugin::configureGui(bool show) {
   return true;
 }
 void ControlPlugin::update(double delta) {}
+
+void ControlPlugin::showWifiSettings() {
+  if(qProcess.state() != QProcess::NotRunning) {
+    qDebug() << "Killing previous instance";
+    qProcess.kill();
+  }else{
+    qDebug() << "Showing wifi connection manager\n";
+    while(!qProcess.state() == QProcess::NotRunning) {
+      QApplication::processEvents();
+    }
+    qProcess.start("wicd-gtk", {"-n"});
+  }
+}

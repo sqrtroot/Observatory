@@ -38,7 +38,7 @@ figlet User
 #  \__,_|___/\___|_|   
 
 if ! `id -u stellarium 2>/dev/null 1>/dev/null`; then
-  useradd -m -d /home/stellarium -G tty stellarium
+  useradd -m -d /home/stellarium -G tty,gpio stellarium
   sudo -u stellarium mkdir -p /home/stellarium/.stellarium/
 fi
 
@@ -119,15 +119,14 @@ cp -f $SCRIPTPATH/startup-files/stellarium.sh /home/stellarium/stellarium.sh
 chown stellarium:stellarium /home/stellarium/stellarium.sh
 chsh -s /home/stellarium/stellarium.sh stellarium
 
-
 systemctl disable display-manager || true
-systemctl enable stellarium
 systemctl set-default graphical
 cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf << EOF
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin stellarium --skip-login --noclear %I \$TERM
 EOF
+
 printf "" > /etc/issue
 printf "" > /etc/issue.net
 printf "" > /etc/motd
@@ -141,7 +140,7 @@ if ! grep -q vt.global_cursor_default=0 /boot/cmdline.txt; then
 	sed -i '$s/$/ vt.global_cursor_default=0/' /boot/cmdline.txt
 fi
 
-cp -r $SCRIPTPATH/stellarium_plymouth_theme /usr/share/plymouth/themes/stellarium
+cp -r $SCRIPTPATH/stellarium_plymouth_theme /usr/share/plymouth/themes/stellarium/
 cat > /etc/plymouth/plymouthd.conf << EOF
 [Daemon]
 Theme=stellarium

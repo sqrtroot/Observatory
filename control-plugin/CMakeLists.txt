@@ -10,9 +10,13 @@ find_package(Qt5OpenGL REQUIRED)
 
 set(STELLARIUM_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../stellarium/)
 add_library(control_plugin SHARED)
+set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOMOC TRUE)
+set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOUIC TRUE)
+set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTORCC TRUE)
 
 target_sources(control_plugin
         PUBLIC
+		src/gui/controlPluginSettingsWindow.ui
         src/gui/ControlPluginSettingsWindow.cpp
         src/gui/ControlPluginSettingsWindow.hpp
         src/ControlPlugin.cpp
@@ -21,7 +25,7 @@ target_sources(control_plugin
 		src/InputThread.hpp
         src/StateMachine.cpp
         src/StateMachine.hpp
-	src/gui/controlPluginSettingsWindow.ui
+		src/control-plugin.qrc
         )
 
 target_include_directories(
@@ -47,7 +51,5 @@ target_include_directories(
 
 target_link_libraries(control_plugin Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL gpiod gpiodcxx)
 target_compile_definitions(control_plugin PUBLIC QT_DYNAMICPLUGIN)
-set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOMOC TRUE)
-set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTOUIC TRUE)
 install(FILES "${CMAKE_BINARY_DIR}/libcontrol_plugin.so" DESTINATION "~/.stellarium/modules/control_plugin")
 

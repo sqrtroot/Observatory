@@ -1,4 +1,6 @@
 control-plugin/build
 control-plugin/cmake-build-debug
 control-plugin/.idea
+control-plugin/include/gpiod.hpp
+control-plugin/include/gpiod.h
 stellarium/*

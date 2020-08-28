@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="control-plugin" >
+        <file alias="wifi-button.png">wifi-signal-pngrepo-com.png</file>
+    </qresource>
+</RCC>

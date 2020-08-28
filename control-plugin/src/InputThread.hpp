@@ -17,7 +17,7 @@ class InputThread : public QThread {
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
 
-  static constexpr auto stopDelay = std::chrono::milliseconds(10);
+  static constexpr auto stopDelay = std::chrono::milliseconds(20);
 
 public:
   InputThread();

@@ -101,5 +101,5 @@ struct ControlSM {
 };
 
 using ControlSM_t =
-  sml::sm<ControlSM, sml::process_queue<std::queue>, sml::logger<QtSMLLogger>>;
+  sml::sm<ControlSM, sml::process_queue<std::queue>>;
 ControlSM_t make_sm(ControlSMContext& csmc);

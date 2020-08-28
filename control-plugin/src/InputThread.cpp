@@ -57,6 +57,7 @@ void InputThread::run() {
     auto event_lines = gpiod::line_bulk({pulse, button}).event_wait(stopDelay);
     if(event_lines) {
       for(const auto& line: event_lines) {
+	auto event = line.event_read();
         if(line == pulse) {
           if(direction.get_value()) {
             statemachine.process_event(RotateRight{});

@@ -6,40 +6,34 @@
 #include <StelMovementMgr.hpp>
 #include <gpiod.hpp>
 
-namespace internal
-{
-  static const unsigned int FRONT_SIZE = sizeof("internal::GetTypeNameHelper<") - 1u;
-  static const unsigned int BACK_SIZE = sizeof(">::GetTypeName") - 1u;
- 
-  template <typename T>
-  struct GetTypeNameHelper
-  {
-    static const char* GetTypeName(void)
-    {
-      static const size_t size = sizeof(__FUNCTION__) - FRONT_SIZE - BACK_SIZE;
-      static char typeName[size] = {};
-      memcpy(typeName, __FUNCTION__ + FRONT_SIZE, size - 1u);
- 
-      return typeName;
-    }
-  };
-}
- 
- 
-template <typename T>
-const char* GetTypeName(void)
-{
+namespace internal {
+static const unsigned int FRONT_SIZE = sizeof("internal::GetTypeNameHelper<") - 1u;
+static const unsigned int BACK_SIZE  = sizeof(">::GetTypeName") - 1u;
+
+template<typename T>
+struct GetTypeNameHelper {
+  static const char* GetTypeName(void) {
+    static const size_t size = sizeof(__FUNCTION__) - FRONT_SIZE - BACK_SIZE;
+    static char         typeName[size] = {};
+    memcpy(typeName, __FUNCTION__ + FRONT_SIZE, size - 1u);
+
+    return typeName;
+  }
+};
+}    // namespace internal
+
+template<typename T>
+const char* GetTypeName(void) {
   return internal::GetTypeNameHelper<T>::GetTypeName();
 }
 
 static const gpiod::line_request LINE_REQUEST_INPUT{
-  "InputThread", gpiod::line_request::EVENT_BOTH_EDGES};
+  "InputThread", gpiod::line_request::EVENT_RISING_EDGE};
 
 InputThread::InputThread():
     stateContext{StelApp::getInstance().getCore(),
                  StelApp::getInstance().getCore()->getMovementMgr()},
-    statemachine(make_sm(stateContext))
-    {
+    statemachine(make_sm(stateContext)) {
   qDebug() << "Constructed InputThread";
 }
 
@@ -47,48 +41,34 @@ void InputThread::run() {
   using namespace ControlSMEvents;
   qDebug() << "Starting input thread";
 
-  // const auto cb_f = [&](){
-  //   statemachine.process_event(ControlSMEvents::RotateTimeout{});
-  // };
-  // connect(&turning_timeout, &QTimer::timeout, cb_f);
-  // turning_timeout.start();
+  running = true;
 
-  running      = true;
+  auto chip = gpiod::chip("gpiochip0");
 
-  auto chip    = gpiod::chip("gpiochip0");
-  auto buttons = chip.get_lines({26, 19, 21});
-  buttons.request(LINE_REQUEST_INPUT);
+  auto pulse     = chip.get_line(26);
+  auto direction = chip.get_line(19);
+  auto button    = chip.get_line(21);
+
+  pulse.request(LINE_REQUEST_INPUT);
+  button.request(LINE_REQUEST_INPUT);
+  direction.request(LINE_REQUEST_INPUT);
 
   while(running) {
-    auto event_lines = buttons.event_wait(std::chrono::nanoseconds(10));
+    auto event_lines = gpiod::line_bulk({pulse, button}).event_wait(stopDelay);
     if(event_lines) {
       for(const auto& line: event_lines) {
-        if(line == buttons[0]) {
-          auto event = line.event_read();
-          if(event.event_type == gpiod::line_event::RISING_EDGE) {
+        if(line == pulse) {
+          if(direction.get_value()) {
             statemachine.process_event(RotateRight{});
-            inputTimerOn = true;
-            lastInputTimestamp = clock::now();
-          }
-        } else if(line == buttons[1]) {
-          auto event = line.event_read();
-          if(event.event_type == gpiod::line_event::RISING_EDGE) {
+          } else {
             statemachine.process_event(RotateLeft{});
-            inputTimerOn = true;
-            lastInputTimestamp = clock::now();
           }
-        } else if(line == buttons[2]) {
-          auto event = line.event_read();
-          if(event.event_type == gpiod::line_event::RISING_EDGE) {
-            statemachine.process_event(ButtonPress{});
-            inputTimerOn = false;
-          }
+        } else {
+          statemachine.process_event(ButtonPress{});
         }
       }
-    }
-    if( inputTimerOn && clock::now() - lastInputTimestamp > stopDelay){
-      inputTimerOn = false;
-      statemachine.process_event(ControlSMEvents::RotateTimeout{});
+    } else {
+      statemachine.process_event(RotateTimeout{});
     }
   }
   qDebug() << "Ending thread";

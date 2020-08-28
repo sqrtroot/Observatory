@@ -17,10 +17,7 @@ class InputThread : public QThread {
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
 
-  bool inputTimerOn = false;
-  using clock = std::chrono::high_resolution_clock;
-  decltype(clock::now()) lastInputTimestamp;
-  static constexpr auto stopDelay = std::chrono::seconds(1);
+  static constexpr auto stopDelay = std::chrono::milliseconds(10);
 
 public:
   InputThread();

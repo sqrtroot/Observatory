@@ -141,7 +141,7 @@ if ! grep -q vt.global_cursor_default=0 /boot/cmdline.txt; then
 	sed -i '$s/$/ vt.global_cursor_default=0/' /boot/cmdline.txt
 fi
 
-cp -r stellarium_plymouth_theme /usr/share/plymouth/themes/stellarium/
+cp -r $SCRIPTPATH/stellarium_plymouth_theme /usr/share/plymouth/themes/stellarium
 cat > /etc/plymouth/plymouthd.conf << EOF
 [Daemon]
 Theme=stellarium

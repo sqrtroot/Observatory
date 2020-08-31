@@ -15,18 +15,20 @@ set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" 
 set_target_properties(control_plugin PROPERTIES FOLDER "plugins/control_plugin" AUTORCC TRUE)
 
 target_sources(control_plugin
-        PUBLIC
+		PUBLIC
 		src/gui/controlPluginSettingsWindow.ui
-        src/gui/ControlPluginSettingsWindow.cpp
-        src/gui/ControlPluginSettingsWindow.hpp
-        src/ControlPlugin.cpp
-        src/ControlPlugin.hpp
+		src/gui/ControlPluginSettingsWindow.cpp
+		src/gui/ControlPluginSettingsWindow.hpp
+		src/ControlPlugin.cpp
+		src/ControlPlugin.hpp
 		src/InputThread.cpp
 		src/InputThread.hpp
-        src/StateMachine.cpp
-        src/StateMachine.hpp
+		src/StateMachine.cpp
+		src/StateMachine.hpp
+		src/DateTimeGui.cpp
+		src/DateTimeGui.hpp
 		src/control-plugin.qrc
-        )
+		)
 
 target_include_directories(
         control_plugin

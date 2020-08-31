@@ -1,11 +1,14 @@
 #include "ControlPlugin.hpp"
+#include <QApplication>
 #include <QComboBox>
 #include <QProcess>
+#include <QtGui/QPainter>
+#include <SkyGui.hpp>
 #include <StelCore.hpp>
-#include <QApplication>
 #include <StelGuiItems.hpp>
 #include <StelModuleMgr.hpp>
 #include <StelPainter.hpp>
+#include <StelUtils.hpp>
 
 StelModule* ControlPluginInterface::getStelModule() const {
   return new ControlPlugin();
@@ -25,11 +28,21 @@ StelPluginInfo ControlPluginInterface::getPluginInfo() const {
   return info;
 }
 ControlPlugin::ControlPlugin():
-    window(std::make_unique<ControlPluginSettingsWindow>()) {
+
+    window(std::make_unique<ControlPluginSettingsWindow>()),
+    stateContext{StelApp::getInstance().getCore(),
+                 StelApp::getInstance().getCore()->getMovementMgr(),
+                 &dateGui,
+                 &timeGui},
+    statemachine(make_sm(stateContext)),
+    ct(statemachine) {
   setObjectName("control_plugin");
+  font.setPixelSize(25);
 }
 
 void ControlPlugin::init() {
+  dateGui.init();
+  timeGui.init();
   ct.start();
   qDebug() << "Initializing Control plugin";
   initWifiButton();
@@ -80,11 +93,15 @@ void ControlPlugin::showWifiSettings() {
   if(qProcess.state() != QProcess::NotRunning) {
     qDebug() << "Killing previous instance";
     qProcess.kill();
-  }else{
+  } else {
     qDebug() << "Showing wifi connection manager\n";
     while(!qProcess.state() == QProcess::NotRunning) {
       QApplication::processEvents();
     }
     qProcess.start("wicd-gtk", {"-n"});
   }
+}
+void ControlPlugin::draw(StelCore* core) {
+  dateGui.draw(core);
+  timeGui.draw(core);
 }

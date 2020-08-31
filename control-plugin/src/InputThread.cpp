@@ -6,34 +6,13 @@
 #include <StelMovementMgr.hpp>
 #include <gpiod.hpp>
 
-namespace internal {
-static const unsigned int FRONT_SIZE = sizeof("internal::GetTypeNameHelper<") - 1u;
-static const unsigned int BACK_SIZE  = sizeof(">::GetTypeName") - 1u;
+static auto                      line_identifier = "Stellarium input thread";
+static const gpiod::line_request LINE_REQUEST_RISING_INPUT{
+  "Stellarium Input Thread", gpiod::line_request::EVENT_RISING_EDGE};
+static const gpiod::line_request LINE_REQUEST_FALLING_INPUT{
+  "Stellarium Input Thread", gpiod::line_request::EVENT_FALLING_EDGE};
 
-template<typename T>
-struct GetTypeNameHelper {
-  static const char* GetTypeName(void) {
-    static const size_t size = sizeof(__FUNCTION__) - FRONT_SIZE - BACK_SIZE;
-    static char         typeName[size] = {};
-    memcpy(typeName, __FUNCTION__ + FRONT_SIZE, size - 1u);
-
-    return typeName;
-  }
-};
-}    // namespace internal
-
-template<typename T>
-const char* GetTypeName(void) {
-  return internal::GetTypeNameHelper<T>::GetTypeName();
-}
-
-static const gpiod::line_request LINE_REQUEST_INPUT{
-  "InputThread", gpiod::line_request::EVENT_RISING_EDGE};
-
-InputThread::InputThread():
-    stateContext{StelApp::getInstance().getCore(),
-                 StelApp::getInstance().getCore()->getMovementMgr()},
-    statemachine(make_sm(stateContext)) {
+InputThread::InputThread(ControlSM_t& statemachine): statemachine(statemachine) {
   qDebug() << "Constructed InputThread";
 }
 
@@ -49,27 +28,40 @@ void InputThread::run() {
   auto direction = chip.get_line(19);
   auto button    = chip.get_line(21);
 
-  pulse.request(LINE_REQUEST_INPUT);
-  button.request(LINE_REQUEST_INPUT);
-  direction.request(LINE_REQUEST_INPUT);
+  pulse.request({line_identifier, gpiod::line_request::EVENT_RISING_EDGE});
+  direction.request({line_identifier, gpiod::line_request::DIRECTION_INPUT});
+  button.request({line_identifier, gpiod::line_request::EVENT_RISING_EDGE});
 
   while(running) {
-    auto event_lines = gpiod::line_bulk({pulse, button}).event_wait(stopDelay);
+    auto event_lines = gpiod::line_bulk({pulse, button}).event_wait(rotationStopDelay);
     if(event_lines) {
       for(const auto& line: event_lines) {
-	auto event = line.event_read();
+        auto event = line.event_read();
         if(line == pulse) {
+          rotating = true;
           if(direction.get_value()) {
             statemachine.process_event(RotateRight{});
           } else {
             statemachine.process_event(RotateLeft{});
           }
         } else {
-          statemachine.process_event(ButtonPress{});
+          if(last_press && clock::now() - *last_press < doubleClickDelay) {
+            last_press.reset();
+            statemachine.process_event(DoubleButtonPress{});
+          } else {
+            last_press = clock::now();
+          }
         }
       }
     } else {
-      statemachine.process_event(RotateTimeout{});
+      if(last_press && clock::now() - *last_press > doubleClickDelay) {
+        last_press.reset();
+        statemachine.process_event(ButtonPress{});
+      }
+      if(rotating) {
+        statemachine.process_event(RotateTimeout{});
+        rotating = false;
+      }
     }
   }
   qDebug() << "Ending thread";

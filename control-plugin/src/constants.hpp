@@ -22,7 +22,7 @@ config_const unsigned int direction_pin_offset   = 5;
 config_const unsigned int button_pin_offset      = 13;
 config_const auto         line_bulk_polling_rate = 50ms;
 
-/* */
+/* Ui settings */
 config_const float zoom_reset_duration = 2.0 /*seconds*/;
 }    // namespace ControlPluginConsts
 

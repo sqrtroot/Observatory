@@ -118,19 +118,19 @@ struct ControlSM {
      */
     // clang-format off
      return make_transition_table(
-         *"zm"_s                 + event<DoubleButtonPress> / nothing             = state<DateTimeControl>,
+         *"zm"_s                 + event<DoubleButtonPress> / nothing         = state<DateTimeControl>,
           "zm"_s                 + event<ButtonPress>       / reset_zoom ,
-          "zm"_s                 + event<RotateRight>       / nothing           = "zi"_s,
-          "zm"_s                 + event<RotateLeft>        / nothing          = "zo"_s,
+          "zm"_s                 + event<RotateRight>       / nothing         = "zi"_s,
+          "zm"_s                 + event<RotateLeft>        / nothing         = "zo"_s,
 
           "zi"_s                 + on_entry<_>              / zoom_in,
-          "zi"_s                 + event<RotateLeft>        / nothing           = "zo"_s,
-          "zi"_s                 + event<RotateTimeout>     / nothing          = "zm"_s,
+          "zi"_s                 + event<RotateLeft>        / nothing         = "zo"_s,
+          "zi"_s                 + event<RotateTimeout>     / nothing         = "zm"_s,
           "zi"_s                 + sml::on_exit<_>          / stop_zooming,
 
           "zo"_s                 + on_entry<_>              / zoom_out,
-          "zo"_s                 + event<RotateRight>       / nothing           = "zi"_s,
-          "zo"_s                 + event<RotateTimeout>     / nothing          = "zm"_s,
+          "zo"_s                 + event<RotateRight>       / nothing         = "zi"_s,
+          "zo"_s                 + event<RotateTimeout>     / nothing         = "zm"_s,
           "zo"_s                 + sml::on_exit<_>          / stop_zooming,
           state<DateTimeControl> + event<ReturnFromSub>     / nothing         = "zm"_s
      );

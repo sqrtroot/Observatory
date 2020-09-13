@@ -21,8 +21,8 @@ StelPluginInfo ControlPluginInterface::getPluginInfo() const {
   info.authors          = "Robert Bezem";
   info.contact          = "info@sqrtroot.com";
   info.description      = "Allow gpio control of functions";
-  info.acknowledgements = "ME ME ME";
-  info.license          = "PRIVATE";
+  info.acknowledgements = "Commonplace studio\n SqrtRoot";
+  info.license          = "GPL";
   info.version          = "1.0.0";
 
   return info;
@@ -46,7 +46,7 @@ ControlPlugin::ControlPlugin():
       make_event_processor<ControlSMEvents::RotateLeft>(statemachine),
       make_event_processor<ControlSMEvents::RotateRight>(statemachine),
       make_event_processor<ControlSMEvents::RotateTimeout>(statemachine),
-      []() {},
+      [this]() { toggle_tv(); },
       make_event_processor<ControlSMEvents::ButtonPress>(statemachine),
       make_event_processor<ControlSMEvents::DoubleButtonPress>(statemachine)),
     ct(encoderActions) {
@@ -116,9 +116,7 @@ void ControlPlugin::showWifiSettings() {
   }
 }
 
-void ControlPlugin::toggle_tv(){
-
-}
+void ControlPlugin::toggle_tv() {}
 
 void ControlPlugin::draw(StelCore* core) {
   dateGui.draw(core);

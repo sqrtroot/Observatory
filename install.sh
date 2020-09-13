@@ -28,7 +28,10 @@ apt install -y \
 	libdrm-dev \
 	libgpiod-dev \
 	gpiod \
-	imagemagick
+	imagemagick \
+	libxfixes-dev \
+	libxi-dev \
+	libev-dev
 }
 
 user(){
@@ -81,6 +84,17 @@ make -j $(nproc)
 EOF
 cd stellarium/build/unix
 make install
+cd $SCRIPTPATH
+}
+
+unclutter(){
+sudo -u `stat -c "%U" .` bash << EOF
+git submodule update --init --depth=1 --recursive -- unclutter-xfixes
+cd unclutter-xfixes
+make unclutter
+EOF
+cd unclutter-xfixes
+install -Dm 0755 unclutter /usr/bin/unclutter
 cd $SCRIPTPATH
 }
 
@@ -175,6 +189,7 @@ all(){
 	software
 	user
 	stellarium
+  unclutter
 	control-plugin
 	startup
 	rtc

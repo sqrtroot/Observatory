@@ -2,5 +2,6 @@
 xset s off
 xset -dpms
 xset s noblank
+/usr/bin/unclutter --start-hidden &
 /usr/bin/xrandr -o right
 /usr/local/bin/stellarium

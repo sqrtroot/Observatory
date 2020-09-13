@@ -4,6 +4,7 @@
 
 #ifndef CONTROL_PLUGIN_INPUTTHREAD_HPP
 #define CONTROL_PLUGIN_INPUTTHREAD_HPP
+#include "EncoderStateMachine.hpp"
 #include "StateMachine.hpp"
 #include <QBasicTimer>
 #include <QEventLoop>
@@ -15,16 +16,15 @@
 class InputThread : public QThread {
   std::atomic<bool> running = false;
 
-  ControlSM_t& statemachine;
+  EncoderSMContext encoderSmContext;
+  EncoderSM_t      encoderSm;
+  QtSMLLogger      logger;
 
-  static constexpr const auto rotationStopDelay = std::chrono::milliseconds(100);
-  static constexpr const auto doubleClickDelay  = std::chrono::milliseconds(300);
-  bool                        rotating          = false;
-  using clock                                   = std::chrono::high_resolution_clock;
+  using clock = std::chrono::high_resolution_clock;
   std::optional<decltype(clock::now())> last_press;
 
 public:
-  explicit InputThread(ControlSM_t& statemachine);
+  explicit InputThread(const EncoderActions& actions);
   void stop();
 
 protected:

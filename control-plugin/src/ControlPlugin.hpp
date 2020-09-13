@@ -1,7 +1,7 @@
 #pragma once
-#include "DateTimeGui.hpp"
 #include "InputThread.hpp"
 #include "gui/ControlPluginSettingsWindow.hpp"
+#include "gui/DateTimeGui.hpp"
 #include <QFont>
 #include <QObject>
 #include <QProcess>
@@ -17,6 +17,7 @@ class ControlPlugin : public StelModule {
 
   ControlSMContext stateContext;
   ControlSM_t      statemachine;
+  EncoderActions   encoderActions;
 
   DateGui dateGui;
   TimeGui timeGui;
@@ -41,8 +42,9 @@ public slots:
 private:
   std::unique_ptr<ControlPluginSettingsWindow> window;
   std::unique_ptr<StelButton>                  wifiButton;
-  QProcess                                     qProcess;
+  QProcess                                     wifiProcess;
   void                                         initWifiButton();
+  void                                         toggle_tv();
 };
 
 class ControlPluginInterface : public QObject, public StelPluginInterface {

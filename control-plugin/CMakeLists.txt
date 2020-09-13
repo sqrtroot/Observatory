@@ -3,6 +3,9 @@ project(control_plugin)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O3")
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O3")
+
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -21,12 +24,13 @@ target_sources(control_plugin
 		src/gui/ControlPluginSettingsWindow.hpp
 		src/ControlPlugin.cpp
 		src/ControlPlugin.hpp
+		src/EncoderStateMachine.hpp
 		src/InputThread.cpp
 		src/InputThread.hpp
 		src/StateMachine.cpp
 		src/StateMachine.hpp
-		src/DateTimeGui.cpp
-		src/DateTimeGui.hpp
+		src/gui/DateTimeGui.cpp
+		src/gui/DateTimeGui.hpp
 		src/control-plugin.qrc
 		)
 

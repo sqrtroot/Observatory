@@ -27,6 +27,13 @@ StelPluginInfo ControlPluginInterface::getPluginInfo() const {
 
   return info;
 }
+
+template<typename T, typename F>
+constexpr auto make_event_processor(F& f) {
+  return [&]() {
+    f.process_event(T{});
+  };
+};
 ControlPlugin::ControlPlugin():
 
     window(std::make_unique<ControlPluginSettingsWindow>()),
@@ -35,7 +42,14 @@ ControlPlugin::ControlPlugin():
                  &dateGui,
                  &timeGui},
     statemachine(make_sm(stateContext)),
-    ct(statemachine) {
+    encoderActions(
+      make_event_processor<ControlSMEvents::RotateLeft>(statemachine),
+      make_event_processor<ControlSMEvents::RotateRight>(statemachine),
+      make_event_processor<ControlSMEvents::RotateTimeout>(statemachine),
+      []() {},
+      make_event_processor<ControlSMEvents::ButtonPress>(statemachine),
+      make_event_processor<ControlSMEvents::DoubleButtonPress>(statemachine)),
+    ct(encoderActions) {
   setObjectName("control_plugin");
   font.setPixelSize(25);
 }
@@ -74,7 +88,7 @@ void ControlPlugin::initWifiButton() {
 
 void ControlPlugin::deinit() {
   ct.stop();
-  qProcess.kill();
+  wifiProcess.kill();
   StelModule::deinit();
 }
 
@@ -90,17 +104,22 @@ bool ControlPlugin::configureGui(bool show) {
 void ControlPlugin::update(double delta) {}
 
 void ControlPlugin::showWifiSettings() {
-  if(qProcess.state() != QProcess::NotRunning) {
+  if(wifiProcess.state() != QProcess::NotRunning) {
     qDebug() << "Killing previous instance";
-    qProcess.kill();
+    wifiProcess.kill();
   } else {
     qDebug() << "Showing wifi connection manager\n";
-    while(!qProcess.state() == QProcess::NotRunning) {
+    while(!wifiProcess.state() == QProcess::NotRunning) {
       QApplication::processEvents();
     }
-    qProcess.start("wicd-gtk", {"-n"});
+    wifiProcess.start("wicd-gtk", {"-n"});
   }
 }
+
+void ControlPlugin::toggle_tv(){
+
+}
+
 void ControlPlugin::draw(StelCore* core) {
   dateGui.draw(core);
   timeGui.draw(core);

@@ -23,8 +23,8 @@ void DateTimeGui::draw(StelCore* core) {
   const auto startSize     = fontMetrics.size(Qt::TextSingleLine, text[0]);
   const auto underlineSize = underlineFontMetrics.size(Qt::TextSingleLine, text[1]);
   const auto endSize       = fontMetrics.size(Qt::TextSingleLine, text[2]);
-  const auto totalWidth = startSize.width() + underlineSize.width() + endSize.width();
-  const auto center_x_start = (float) center_x - (float) totalWidth / 2;
+  const auto totalWidth = startSize + underlineSize + endSize;
+  const auto center_x_start = (float) center_x - (float) totalWidth.width() / 2;
   const auto center_y_start = (float) center_y - (float) startSize.height() / 2;
 
   StelPainter painter(core->getProjection2d());

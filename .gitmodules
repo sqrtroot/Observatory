@@ -2,3 +2,6 @@
 	path = stellarium
 	url = https://github.com/Stellarium/stellarium.git
 	ignore = dirty
+[submodule "unclutter-xfixes"]
+	path = unclutter-xfixes
+	url = https://github.com/sqrtroot/unclutter-xfixes.git

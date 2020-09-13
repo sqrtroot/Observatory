@@ -98,7 +98,8 @@ sudo -u `stat -c "%U" .` bash << EOF
 git submodule update --init --depth=1 --recursive
 mkdir -p build
 cd build
-cmake ..
+cmake .. \
+-DCMAKE_BUILD_TYPE:STRING="Release"
 make
 EOF
 sudo -u stellarium mkdir -p /home/stellarium/.stellarium/modules/control_plugin/

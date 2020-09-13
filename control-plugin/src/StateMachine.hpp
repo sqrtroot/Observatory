@@ -1,5 +1,6 @@
 #pragma once
 #include "QtSMLLogger.hpp"
+#include "constants.hpp"
 #include "gui/DateTimeGui.hpp"
 #include <StelCore.hpp>
 #include <StelMovementMgr.hpp>
@@ -38,24 +39,18 @@ struct DateTimeControl {
       sc.dateGui->underscore = underscore;
     };
   }
-  static void disable_dategui(ControlSMContext & sc){
-    sc.dateGui->show = false;
-  }
+  static void disable_dategui(ControlSMContext& sc) { sc.dateGui->show = false; }
   static constexpr auto enable_timegui(const TimeGui::Underscore& underscore) {
     return [=](ControlSMContext& sc) {
       sc.timeGui->show       = true;
       sc.timeGui->underscore = underscore;
     };
   }
-  static void disable_timegui(ControlSMContext & sc){
-    sc.dateGui->show = false;
-  }
-
+  static void disable_timegui(ControlSMContext& sc) { sc.dateGui->show = false; }
 
   auto operator()() const {
     using namespace sml;
     using namespace ControlSMEvents;
-
 
     /*
      * Initial state: *year_control
@@ -113,7 +108,8 @@ struct ControlSM {
       sc.stelMovementMgr->zoomOut(true);
     };
     constexpr auto reset_zoom = [](ControlSMContext& sc) {
-      sc.stelMovementMgr->zoomTo(sc.stelMovementMgr->getInitFov(), .200);
+      sc.stelMovementMgr->zoomTo(sc.stelMovementMgr->getInitFov(),
+                                 ControlPluginConsts::zoom_reset_duration);
     };
 
     /**
@@ -143,5 +139,5 @@ struct ControlSM {
 };
 
 using ControlSM_t =
-  sml::sm<ControlSM, sml::process_queue<std::queue>>;
+  sml::sm<ControlSM, sml::process_queue<std::queue>, sml::logger<QtSMLLogger>>;
 ControlSM_t make_sm(ControlSMContext& csmc);

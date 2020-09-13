@@ -27,7 +27,8 @@ apt install -y \
 	qttools5-dev \
 	libdrm-dev \
 	libgpiod-dev \
-	gpiod
+	gpiod \
+	imagemagick
 }
 
 user(){
@@ -57,7 +58,8 @@ figlet Stellarium
 #|____/ \__\___|_|_|\__,_|_|  |_|\__,_|_| |_| |_|
                                                 
 sudo -u `stat -c "%U" .` bash << EOF
-git submodule update --depth=1 --recursive
+git submodule update --init --depth=1 --recursive -- stellarium
+$SCRIPTPATH/change_nebulae.sh
 cd stellarium
 git apply ../stellarium.patch
 mkdir -p build/unix
@@ -93,7 +95,7 @@ figlet Control-plugin
 
 cd control-plugin/
 sudo -u `stat -c "%U" .` bash << EOF
-git submodule update --depth=1 --recursive
+git submodule update --init --depth=1 --recursive
 mkdir -p build
 cd build
 cmake ..

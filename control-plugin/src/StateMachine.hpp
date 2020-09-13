@@ -62,34 +62,36 @@ struct DateTimeControl {
      * Transition DSL: src_state + event [ guard ] / action = dst_state
      */
     // clang-format off
-     return make_transition_table(                                                                                                                  
-         /*| Initial State          | Event                 | Action                                                            | End state           */
-         /*|*/*"year_control"_s   /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::year),                        /* self*/
-         /*|*/ "year_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "month_control"_s,
-         /*|*/ "year_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractJulianYear();},    /* self*/
-         /*|*/ "year_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addJulianYear();},         /* self*/
+     return make_transition_table(
 
-         /*|*/ "month_control"_s  /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::month),
-         /*|*/ "month_control"_s  /*|*/+ event<ButtonPress> / nothing                                                           = "day_control"_s,
-         /*|*/ "month_control"_s  /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractCalendricMonth();},
-         /*|*/ "month_control"_s  /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addCalendricMonth();},
+       /*| Initial State          | Event                 | Action                                                            | End state           */
+       /*|*/*"hour_control"_s   /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::hour),
+       /*|*/ "hour_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "minute_control"_s,
+       /*|*/ "hour_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractHour();},
+       /*|*/ "hour_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addHour();},
 
-         /*|*/ "day_control"_s    /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::day),
-         /*|*/ "day_control"_s    /*|*/+ event<ButtonPress> / nothing                                                           = "hour_control"_s,
-         /*|*/ "day_control"_s    /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractDay();},
-         /*|*/ "day_control"_s    /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addDay();},
-         /*|*/ "day_control"_s    /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;},
+       /*|*/ "minute_control"_s /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::minute),
+       /*|*/ "minute_control"_s /*|*/+ event<ButtonPress>                                                                     = "year_control"_s,
+       /*|*/ "minute_control"_s /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractMinute();},
+       /*|*/ "minute_control"_s /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addMinute();},
+       /*|*/ "minute_control"_s /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.timeGui->show=false;},
 
-         /*|*/ "hour_control"_s   /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::hour),
-         /*|*/ "hour_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "minute_control"_s,
-         /*|*/ "hour_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractHour();},
-         /*|*/ "hour_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addHour();},
+       /*|*/ "year_control"_s   /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::year),             /* self*/
+       /*|*/ "year_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "month_control"_s,
+       /*|*/ "year_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractJulianYear();},    /* self*/
+       /*|*/ "year_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addJulianYear();},         /* self*/
 
-         /*|*/ "minute_control"_s /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::minute),
-         /*|*/ "minute_control"_s /*|*/+ event<ButtonPress> / process(ReturnFromSub{}),
-         /*|*/ "minute_control"_s /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractMinute();},
-         /*|*/ "minute_control"_s /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addMinute();},
-         /*|*/ "minute_control"_s /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.timeGui->show=false;}
+       /*|*/ "month_control"_s  /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::month),
+       /*|*/ "month_control"_s  /*|*/+ event<ButtonPress> / nothing                                                           = "day_control"_s,
+       /*|*/ "month_control"_s  /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractCalendricMonth();},
+       /*|*/ "month_control"_s  /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addCalendricMonth();},
+
+       /*|*/ "day_control"_s    /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::day),
+       /*|*/ "day_control"_s    /*|*/+ event<ButtonPress> / process(ReturnFromSub{}),
+       /*|*/ "day_control"_s    /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractDay();},
+       /*|*/ "day_control"_s    /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addDay();},
+       /*|*/ "day_control"_s    /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;}
+
     );
     }
   // clang-format on

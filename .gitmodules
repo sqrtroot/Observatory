@@ -1,4 +1,4 @@
 [submodule "stellarium"]
 	path = stellarium
-	url = git@github.com:Stellarium/stellarium.git
+	url = https://github.com/Stellarium/stellarium.git
 	ignore = dirty

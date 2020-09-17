@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.13)
 project(control_plugin)
 
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O3")
 set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O3")
 
+find_package(X11 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -55,7 +57,7 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}/src
 )
 
-target_link_libraries(control_plugin Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL gpiod gpiodcxx)
+target_link_libraries(control_plugin Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL gpiod gpiodcxx ${X11_Xfixes_LIB})
 target_compile_definitions(control_plugin PUBLIC QT_DYNAMICPLUGIN)
 install(FILES "${CMAKE_BINARY_DIR}/libcontrol_plugin.so" DESTINATION "~/.stellarium/modules/control_plugin")
 

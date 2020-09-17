@@ -6,13 +6,9 @@ if [[ $input == "s" ]]; then
 else
   if [ -d "/dev/input/by-id" ]; then
     find /dev/input/by-id -name "*mouse" -print0 2>/dev/null | grep -qz "^"
-    mouse=$?
+    export mouse=$?
   else
-    mouse=-1
+    export mouse=-1
   fi
-  if [[ $mouse -eq 0 || "$input" = "c" ]]; then
-	  /usr/bin/startx /etc/X11/xinit/stellarium.xinit -- -quiet > /dev/null 2>&1
-	else
-	  /usr/bin/startx /etc/X11/xinit/stellarium.xinit -- -nocursor -quiet > /dev/null 2>&1
-	fi
+  /usr/bin/startx /etc/X11/xinit/stellarium.xinit -- -quiet > /dev/null 2>&1
 fi

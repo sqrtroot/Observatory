@@ -1,6 +1,8 @@
 #pragma once
 #include "QtSMLLogger.hpp"
+#include "constants.hpp"
 #include "gui/DateTimeGui.hpp"
+#include <chrono>
 #include <StelCore.hpp>
 #include <StelMovementMgr.hpp>
 #include <atomic>
@@ -8,6 +10,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <QProcess>
 
 #define nothing \
   []() {        \
@@ -24,6 +27,7 @@ struct ControlSMContext {
 
 namespace ControlSMEvents {
 struct DoubleButtonPress {};
+struct LongPress{};
 struct ButtonPress {};
 struct RotateLeft {};
 struct RotateRight {};
@@ -38,58 +42,58 @@ struct DateTimeControl {
       sc.dateGui->underscore = underscore;
     };
   }
-  static void disable_dategui(ControlSMContext & sc){
-    sc.dateGui->show = false;
-  }
+  static void disable_dategui(ControlSMContext& sc) { sc.dateGui->show = false; }
   static constexpr auto enable_timegui(const TimeGui::Underscore& underscore) {
     return [=](ControlSMContext& sc) {
       sc.timeGui->show       = true;
       sc.timeGui->underscore = underscore;
     };
   }
-  static void disable_timegui(ControlSMContext & sc){
-    sc.dateGui->show = false;
-  }
-
+  static void disable_timegui(ControlSMContext& sc) { sc.dateGui->show = false; }
 
   auto operator()() const {
     using namespace sml;
     using namespace ControlSMEvents;
-
 
     /*
      * Initial state: *year_control
      * Transition DSL: src_state + event [ guard ] / action = dst_state
      */
     // clang-format off
-     return make_transition_table(                                                                                                                  
-         /*| Initial State          | Event                 | Action                                                            | End state           */
-         /*|*/*"year_control"_s   /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::year),                        /* self*/
-         /*|*/ "year_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "month_control"_s,
-         /*|*/ "year_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractJulianYear();},    /* self*/
-         /*|*/ "year_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addJulianYear();},         /* self*/
+     return make_transition_table(
 
-         /*|*/ "month_control"_s  /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::month),
-         /*|*/ "month_control"_s  /*|*/+ event<ButtonPress> / nothing                                                           = "day_control"_s,
-         /*|*/ "month_control"_s  /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractCalendricMonth();},
-         /*|*/ "month_control"_s  /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addCalendricMonth();},
+       /*| Initial State          | Event                 | Action                                                            | End state           */
+       /*|*/*"minute_control"_s /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::minute),
+       /*|*/ "minute_control"_s /*|*/+ event<ButtonPress>                                                                     = "hour_control"_s,
+       /*|*/ "minute_control"_s /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractMinute();},
+       /*|*/ "minute_control"_s /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addMinute();},
+       /*|*/ "minute_control"_s /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.timeGui->show=false;},
 
-         /*|*/ "day_control"_s    /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::day),
-         /*|*/ "day_control"_s    /*|*/+ event<ButtonPress> / nothing                                                           = "hour_control"_s,
-         /*|*/ "day_control"_s    /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractDay();},
-         /*|*/ "day_control"_s    /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addDay();},
-         /*|*/ "day_control"_s    /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;},
+       /*|*/ "hour_control"_s   /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::hour),
+       /*|*/ "hour_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "day_control"_s,
+       /*|*/ "hour_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractHour();},
+       /*|*/ "hour_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addHour();},
+       /*|*/ "hour_control"_s   /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.timeGui->show=false;},
+       
 
-         /*|*/ "hour_control"_s   /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::hour),
-         /*|*/ "hour_control"_s   /*|*/+ event<ButtonPress> / nothing                                                           = "minute_control"_s,
-         /*|*/ "hour_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractHour();},
-         /*|*/ "hour_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addHour();},
+       /*|*/ "day_control"_s    /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::day),
+       /*|*/ "day_control"_s    /*|*/+ event<ButtonPress> / nothing = "month_control"_s,
+       /*|*/ "day_control"_s    /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractDay();},
+       /*|*/ "day_control"_s    /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addDay();},
+       /*|*/ "day_control"_s  /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;},
 
-         /*|*/ "minute_control"_s /*|*/+ on_entry<_>        / enable_timegui(TimeGui::Underscore::minute),
-         /*|*/ "minute_control"_s /*|*/+ event<ButtonPress> / process(ReturnFromSub{}),
-         /*|*/ "minute_control"_s /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractMinute();},
-         /*|*/ "minute_control"_s /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addMinute();},
-         /*|*/ "minute_control"_s /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.timeGui->show=false;}
+       /*|*/ "month_control"_s  /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::month),
+       /*|*/ "month_control"_s  /*|*/+ event<ButtonPress> / nothing                                                           = "year_control"_s,
+       /*|*/ "month_control"_s  /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractCalendricMonth();},
+       /*|*/ "month_control"_s  /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addCalendricMonth();},
+       /*|*/ "month_control"_s  /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;},
+
+       /*|*/ "year_control"_s   /*|*/+ on_entry<_>        / enable_dategui(DateGui::Underscore::year),             /* self*/
+       /*|*/ "year_control"_s   /*|*/+ event<ButtonPress> / process(ReturnFromSub{}),
+       /*|*/ "year_control"_s   /*|*/+ event<RotateLeft>  / [](ControlSMContext & sc){sc.stelCore->subtractJulianYear();},    /* self*/
+       /*|*/ "year_control"_s   /*|*/+ event<RotateRight> / [](ControlSMContext & sc){sc.stelCore->addJulianYear();},         /* self*/
+       /*|*/ "year_control"_s   /*|*/+ sml::on_exit<_>    / [](ControlSMContext & sc){sc.dateGui->show=false;}
+
     );
     }
   // clang-format on
@@ -105,14 +109,28 @@ struct ControlSM {
       sc.stelMovementMgr->zoomOut(false);
     };
     constexpr auto zoom_in = [](ControlSMContext& sc) {
+      sc.stelMovementMgr->moveSlow(true);
       sc.stelMovementMgr->zoomIn(true);
     };
     constexpr auto zoom_out = [](ControlSMContext& sc) {
+      sc.stelMovementMgr->moveSlow(true);
       sc.stelMovementMgr->zoomOut(true);
     };
     constexpr auto reset_zoom = [](ControlSMContext& sc) {
-      sc.stelMovementMgr->zoomTo(sc.stelMovementMgr->getInitFov(), .200);
+      sc.stelMovementMgr->zoomTo(sc.stelMovementMgr->getInitFov(),
+                                 ControlPluginConsts::zoom_reset_duration);
     };
+
+    constexpr auto toggle_tv = [](ControlSMContext& sc){
+      auto process = QProcess();
+      process.start("/usr/bin/toggleTV", {}, QProcess::ReadWrite);
+      process.waitForFinished();
+    };
+
+    constexpr auto reset_date = [](ControlSMContext& sc){
+	    sc.stelCore->setTimeNow();
+    };
+
 
     /**
      * Initial state: *zm
@@ -120,26 +138,30 @@ struct ControlSM {
      */
     // clang-format off
      return make_transition_table(
-         *"zm"_s                 + event<DoubleButtonPress> / nothing             = state<DateTimeControl>,
+         *"zm"_s                 + event<DoubleButtonPress> / nothing         = state<DateTimeControl>,
           "zm"_s                 + event<ButtonPress>       / reset_zoom ,
-          "zm"_s                 + event<RotateRight>       / nothing           = "zi"_s,
-          "zm"_s                 + event<RotateLeft>        / nothing          = "zo"_s,
+          "zm"_s                 + event<RotateRight>       / nothing         = "zi"_s,
+          "zm"_s                 + event<RotateLeft>        / nothing         = "zo"_s,
+	  "zm"_s                 + event<LongPress>         / toggle_tv       = "po"_s,
+	  "po"_s                 + event<LongPress>         / toggle_tv       = "zm"_s,
 
           "zi"_s                 + on_entry<_>              / zoom_in,
-          "zi"_s                 + event<RotateLeft>        / nothing           = "zo"_s,
-          "zi"_s                 + event<RotateTimeout>     / nothing          = "zm"_s,
+          "zi"_s                 + event<RotateLeft>        / nothing         = "zo"_s,
+          "zi"_s                 + event<RotateTimeout>     / nothing         = "zm"_s,
           "zi"_s                 + sml::on_exit<_>          / stop_zooming,
 
           "zo"_s                 + on_entry<_>              / zoom_out,
-          "zo"_s                 + event<RotateRight>       / nothing           = "zi"_s,
-          "zo"_s                 + event<RotateTimeout>     / nothing          = "zm"_s,
+          "zo"_s                 + event<RotateRight>       / nothing         = "zi"_s,
+          "zo"_s                 + event<RotateTimeout>     / nothing         = "zm"_s,
           "zo"_s                 + sml::on_exit<_>          / stop_zooming,
-          state<DateTimeControl> + event<ReturnFromSub>     / nothing         = "zm"_s
+          state<DateTimeControl> + event<ReturnFromSub>     / nothing         = "zm"_s,
+	  state<DateTimeControl> + event<DoubleButtonPress> / nothing         = "zm"_s,
+	  state<DateTimeControl> + event<LongPress>         / reset_date
      );
     // clang-format on
   }
 };
 
 using ControlSM_t =
-  sml::sm<ControlSM, sml::process_queue<std::queue>>;
+  sml::sm<ControlSM, sml::process_queue<std::queue>, sml::logger<QtSMLLogger>>;
 ControlSM_t make_sm(ControlSMContext& csmc);

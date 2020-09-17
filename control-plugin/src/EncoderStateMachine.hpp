@@ -6,6 +6,7 @@
 #define CONTROL_PLUGIN_ENCODERSTATEMACHINE_HPP
 
 #include "QtSMLLogger.hpp"
+#include "constants.hpp"
 #include <boost/sml.hpp>
 #include <chrono>
 #include <cstdint>
@@ -64,9 +65,9 @@ struct EncoderSM {
     using namespace EncoderSMEvents;
     using clock                    = std::chrono::high_resolution_clock;
     constexpr auto out_of_deadzone = [](EncoderSMContext& c) {
-      c.timeout_after = EncoderSMContext::clock::now() + std::chrono::milliseconds(500);
+      c.timeout_after = EncoderSMContext::clock::now() + ControlPluginConsts::deadzone_timeout;
       c.timeout_active = true;
-      return ++c.deadzoneCounter > 2;
+      return ++c.deadzoneCounter > ControlPluginConsts::deadzoneMax;
     };
     constexpr auto make_set_timeout = [](const EncoderSMContext::clock::duration& duration) {
       return [duration](EncoderSMContext& c) {
@@ -80,7 +81,7 @@ struct EncoderSM {
       } else {
         c.actions.right_rotation_action();
       }
-      make_set_timeout(std::chrono::milliseconds(500))(c);
+      make_set_timeout(ControlPluginConsts::rotation_timeout)(c);
     };
 
     // clang-format off
@@ -91,18 +92,18 @@ struct EncoderSM {
         "nothing"_s + sml::on_exit<_> / [](EncoderSMContext&c){c.timeout_active=false;},
 
 
-       "rotating"_s + sml::on_entry<_> / make_set_timeout(std::chrono::milliseconds(500)),
+       "rotating"_s + sml::on_entry<_> / make_set_timeout(ControlPluginConsts::rotation_timeout),
        "rotating"_s + event<RotationPulse> / send_rotation,
        "rotating"_s + event<Timeout> = "nothing"_s,
        "rotating"_s + sml::on_exit<_> / [](EncoderSMContext&c){c.deadzoneCounter = 0; c.timeout_active=false; c.actions.rotation_timeout_action();},
 
-       "p1"_s + sml::on_entry<_> / make_set_timeout(std::chrono::seconds(2)),
+       "p1"_s + sml::on_entry<_> / make_set_timeout(ControlPluginConsts::longpress_timeout),
        "p1"_s + event<Timeout> / [](EncoderSMContext&c) {c.actions.long_press_action();} = "nothing"_s,
        "p1"_s + event<ButtonUp> = "p2"_s,
        "p2"_s + sml::on_exit<_> / [](EncoderSMContext&c){c.timeout_active=false;},
 
        "p2"_s + event<ButtonDown> / [](EncoderSMContext&c) {c.actions.double_press_action();} = "nothing"_s,
-       "p2"_s + sml::on_entry<_> / make_set_timeout(std::chrono::milliseconds(300)),
+       "p2"_s + sml::on_entry<_> / make_set_timeout(ControlPluginConsts::doublepress_timeout),
        "p2"_s + event<Timeout> / [](EncoderSMContext&c) {c.actions.short_press_action();} = "nothing"_s,
        "p2"_s + sml::on_exit<_> / [](EncoderSMContext&c){c.timeout_active=false;}
     );

@@ -44,7 +44,6 @@ private:
   std::unique_ptr<StelButton>                  wifiButton;
   QProcess                                     wifiProcess;
   void                                         initWifiButton();
-  void                                         toggle_tv();
 };
 
 class ControlPluginInterface : public QObject, public StelPluginInterface {

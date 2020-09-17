@@ -6,6 +6,7 @@
 #include <SkyGui.hpp>
 #include <StelCore.hpp>
 #include <StelGuiItems.hpp>
+#include <StelGui.hpp>
 #include <StelModuleMgr.hpp>
 #include <StelPainter.hpp>
 #include <StelUtils.hpp>
@@ -21,8 +22,8 @@ StelPluginInfo ControlPluginInterface::getPluginInfo() const {
   info.authors          = "Robert Bezem";
   info.contact          = "info@sqrtroot.com";
   info.description      = "Allow gpio control of functions";
-  info.acknowledgements = "ME ME ME";
-  info.license          = "PRIVATE";
+  info.acknowledgements = "Commonplace studio\n SqrtRoot";
+  info.license          = "GPL";
   info.version          = "1.0.0";
 
   return info;
@@ -46,12 +47,20 @@ ControlPlugin::ControlPlugin():
       make_event_processor<ControlSMEvents::RotateLeft>(statemachine),
       make_event_processor<ControlSMEvents::RotateRight>(statemachine),
       make_event_processor<ControlSMEvents::RotateTimeout>(statemachine),
-      []() {},
+      make_event_processor<ControlSMEvents::LongPress>(statemachine),
       make_event_processor<ControlSMEvents::ButtonPress>(statemachine),
       make_event_processor<ControlSMEvents::DoubleButtonPress>(statemachine)),
     ct(encoderActions) {
   setObjectName("control_plugin");
   font.setPixelSize(25);
+  try {
+    auto gui = dynamic_cast<StelGui*>(StelApp::getInstance().getGui());
+    if(gui != Q_NULLPTR) {
+      gui->setVisible(false);
+      gui->setAutoHideVerticalButtonBar(true);
+      gui->setAutoHideHorizontalButtonBar(true);
+    }
+  } catch(std::runtime_error& e) {}
 }
 
 void ControlPlugin::init() {
@@ -112,13 +121,12 @@ void ControlPlugin::showWifiSettings() {
     while(!wifiProcess.state() == QProcess::NotRunning) {
       QApplication::processEvents();
     }
-    wifiProcess.start("wicd-gtk", {"-n"});
+    wifiProcess.start("wpa_gui", {}, QProcess::ReadWrite);
+    QProcess().start("wmctrl", {"-R wpa_gui"}, QProcess::ReadWrite);
+    QProcess().start("wmctrl", {"-r wpa_gui -e 0,0,0,512,512"}, QProcess::ReadWrite);
   }
 }
 
-void ControlPlugin::toggle_tv(){
-
-}
 
 void ControlPlugin::draw(StelCore* core) {
   dateGui.draw(core);

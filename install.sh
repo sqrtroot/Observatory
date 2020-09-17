@@ -27,7 +27,12 @@ apt install -y \
 	qttools5-dev \
 	libdrm-dev \
 	libgpiod-dev \
-	gpiod
+	gpiod \
+	imagemagick \
+	libxfixes-dev \
+	libxi-dev \
+	libev-dev \
+	wpagui
 }
 
 user(){
@@ -57,7 +62,8 @@ figlet Stellarium
 #|____/ \__\___|_|_|\__,_|_|  |_|\__,_|_| |_| |_|
                                                 
 sudo -u `stat -c "%U" .` bash << EOF
-git submodule update --depth=1 --recursive
+git submodule update --init --depth=1 --recursive -- stellarium
+$SCRIPTPATH/change_nebulae.sh
 cd stellarium
 git apply ../stellarium.patch
 mkdir -p build/unix
@@ -82,6 +88,17 @@ make install
 cd $SCRIPTPATH
 }
 
+unclutter(){
+sudo -u `stat -c "%U" .` bash << EOF
+git submodule update --init --depth=1 --recursive -- unclutter-xfixes
+cd unclutter-xfixes
+make unclutter
+EOF
+cd unclutter-xfixes
+install -Dm 0755 unclutter /usr/bin/unclutter
+cd $SCRIPTPATH
+}
+
 control-plugin(){
 figlet Control-plugin
 #                 _             _             _             _       
@@ -93,15 +110,17 @@ figlet Control-plugin
 
 cd control-plugin/
 sudo -u `stat -c "%U" .` bash << EOF
-git submodule update --depth=1 --recursive
+git submodule update --init --depth=1 --recursive
 mkdir -p build
 cd build
-cmake ..
+cmake .. \
+-DCMAKE_BUILD_TYPE:STRING="Release"
 make
 EOF
 sudo -u stellarium mkdir -p /home/stellarium/.stellarium/modules/control_plugin/
 cp build/libcontrol_plugin.so /home/stellarium/.stellarium/modules/control_plugin/ 
 chown stellarium:stellarium /home/stellarium/.stellarium/modules/control_plugin/libcontrol_plugin.so
+install -Dm 0755 $SCRIPTPATH/toggleTV.sh /usr/bin/toggleTV
 }
 
 startup(){
@@ -159,10 +178,10 @@ figlet rtc
 #|_|   \__\___|
               	
 if ! grep -q "^dtparam=i2c_arm=on" /boot/config.txt; then
-	echo "^dtparam=i2c_arm=on" >> /boot/config.txt
+	echo "dtparam=i2c_arm=on" >> /boot/config.txt
 fi
-if ! grep -q "^i2c-dev" /etc/modules; then
-	echo i2c-dev >> /etc/modules
+if ! grep -q "^dtoverlay=i2c-rtc,ds3231" /boot/config.txt; then
+	echo "dtoverlay=i2c-rtc,ds3231" >> /boot/config.txt
 fi
 }
 
@@ -172,6 +191,7 @@ all(){
 	software
 	user
 	stellarium
+        unclutter
 	control-plugin
 	startup
 	rtc

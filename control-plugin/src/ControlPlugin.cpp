@@ -116,7 +116,11 @@ void ControlPlugin::showWifiSettings() {
   }
 }
 
-void ControlPlugin::toggle_tv() {}
+void ControlPlugin::toggle_tv() {
+  auto process = QProcess();
+  process.start("/usr/bin/toggleTV", {}, QProcess::ReadWrite);
+  process.waitForFinished();
+}
 
 void ControlPlugin::draw(StelCore* core) {
   dateGui.draw(core);

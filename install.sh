@@ -119,6 +119,8 @@ EOF
 sudo -u stellarium mkdir -p /home/stellarium/.stellarium/modules/control_plugin/
 cp build/libcontrol_plugin.so /home/stellarium/.stellarium/modules/control_plugin/ 
 chown stellarium:stellarium /home/stellarium/.stellarium/modules/control_plugin/libcontrol_plugin.so
+install -Dm 0755 $SCRIPTPATH/toggleTV.sh /usr/bin/toggleTV
+
 }
 
 startup(){

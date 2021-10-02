@@ -121,6 +121,24 @@ sudo -u stellarium mkdir -p /home/stellarium/.stellarium/modules/control_plugin/
 cp build/libcontrol_plugin.so /home/stellarium/.stellarium/modules/control_plugin/ 
 chown stellarium:stellarium /home/stellarium/.stellarium/modules/control_plugin/libcontrol_plugin.so
 install -Dm 0755 $SCRIPTPATH/toggleTV.sh /usr/bin/toggleTV
+install -Dm 0755 $SCRIPTPATH/change_tz.sh /usr/bin/changeTZ
+cd $SCRIPTPATH
+}
+mask-plugin(){
+figlet mask-plugin
+cd mask_plugin/
+sudo -u `stat -c "%U" .` bash << EOF
+git submodule update --init --depth=1 --recursive
+mkdir -p build
+cd build
+cmake .. \
+-DCMAKE_BUILD_TYPE:STRING="Release"
+make
+EOF
+sudo -u stellarium mkdir -p /home/stellarium/.stellarium/modules/mask_plugin/
+cp build/libmask_plugin.so /home/stellarium/.stellarium/modules/mask_plugin/ 
+chown stellarium:stellarium /home/stellarium/.stellarium/modules/mask_plugin/libmask_plugin.so
+cd $SCRIPTPATH
 }
 
 startup(){

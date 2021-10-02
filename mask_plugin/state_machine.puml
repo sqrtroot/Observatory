@@ -1,0 +1,35 @@
+@startuml
+state "Zoom Mode" as zm
+state "Zooming In" as zi
+state "Zooming Out" as zo
+
+[*] -down-> zm
+zm -down-> zi : Rotating right
+zm -down-> zo : Rotating left
+zi -up-> zm : Rotating Timeout
+zo -up-> zm : Rotating Timeout
+zi -left-> zo : Rotating left
+zo -right-> zi : Rotating right
+zm --> dtm : Double Button press
+zm : Button press / Zoom to default
+
+state "DateTime Mode" as dtm{
+    [*] --> Year
+    Year : rotate right / increase
+    Year : rotate left / decrease
+    Year --> Month : Button press
+    Month : rotate right / increase
+    Month : rotate left / decrease
+    Month --> Day : Button press
+    Day : rotate right / increase
+    Day : rotate left / decrease
+    Day --> Hour : Button press
+    Hour : rotate right / increase
+    Hour : rotate left / decrease
+    Hour --> Minute : Button press
+    Minute : rotate right / increase
+    Minute : rotate left / decrease
+    Minute -up-> zm : Button press / ReturnFromSub
+}
+
+@enduml

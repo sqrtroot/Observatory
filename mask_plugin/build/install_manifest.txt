@@ -1,0 +1,1 @@
+/home/pi/.stellarium/modules/mask_plugin/libmask_plugin.so

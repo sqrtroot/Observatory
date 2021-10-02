@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="mask-plugin" >
+        <file alias="mask.png">mask.png</file>
+    </qresource>
+</RCC>

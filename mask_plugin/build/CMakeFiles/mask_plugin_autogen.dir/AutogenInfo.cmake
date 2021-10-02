@@ -1,0 +1,35 @@
+# Meta
+set(AM_MULTI_CONFIG "FALSE")
+set(AM_PARALLEL "1")
+set(AM_VERBOSITY "")
+# Directories
+set(AM_CMAKE_SOURCE_DIR "/home/pi/Observatory/mask_plugin")
+set(AM_CMAKE_BINARY_DIR "/home/pi/Observatory/mask_plugin/build")
+set(AM_CMAKE_CURRENT_SOURCE_DIR "/home/pi/Observatory/mask_plugin")
+set(AM_CMAKE_CURRENT_BINARY_DIR "/home/pi/Observatory/mask_plugin/build")
+set(AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE "")
+set(AM_BUILD_DIR "/home/pi/Observatory/mask_plugin/build/mask_plugin_autogen")
+set(AM_INCLUDE_DIR "/home/pi/Observatory/mask_plugin/build/mask_plugin_autogen/include")
+# Files
+set(AM_SOURCES "/home/pi/Observatory/mask_plugin/src/MaskPlugin.cpp")
+set(AM_HEADERS "/home/pi/Observatory/mask_plugin/src/MaskPlugin.hpp")
+set(AM_SETTINGS_FILE "/home/pi/Observatory/mask_plugin/build/CMakeFiles/mask_plugin_autogen.dir/AutogenOldSettings.txt")
+# Qt
+set(AM_QT_VERSION_MAJOR 5)
+set(AM_QT_MOC_EXECUTABLE "/usr/lib/qt5/bin/moc")
+set(AM_QT_UIC_EXECUTABLE "/usr/lib/qt5/bin/uic")
+# MOC settings
+set(AM_MOC_SKIP "")
+set(AM_MOC_DEFINITIONS "QT_CORE_LIB;QT_DYNAMICPLUGIN;QT_GUI_LIB;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB")
+set(AM_MOC_INCLUDES "/home/pi/Observatory/mask_plugin/include;/home/pi/Observatory/mask_plugin/build;/home/pi/Observatory/mask_plugin/../stellarium/src;/home/pi/Observatory/mask_plugin/../stellarium/src/core;/home/pi/Observatory/mask_plugin/../stellarium/src/core/modules;/home/pi/Observatory/mask_plugin/../stellarium/src/core/planetsephems;/home/pi/Observatory/mask_plugin/../stellarium/src/external;/home/pi/Observatory/mask_plugin/../stellarium/src/external/qtcompress;/home/pi/Observatory/mask_plugin/../stellarium/src/external/qcustomplot;/home/pi/Observatory/mask_plugin/../stellarium/src/external/glues_stel/source;/home/pi/Observatory/mask_plugin/../stellarium/src/external/glues_stel/source/libtess;/home/pi/Observatory/mask_plugin/../stellarium/src/gui;/home/pi/Observatory/mask_plugin/../stellarium/src/scripting;/home/pi/Observatory/mask_plugin/build/src;/usr/include/arm-linux-gnueabihf/qt5;/usr/include/arm-linux-gnueabihf/qt5/QtCore;/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++;/usr/include/arm-linux-gnueabihf/qt5/QtGui;/usr/include/arm-linux-gnueabihf/qt5/QtWidgets;/usr/include/arm-linux-gnueabihf/qt5/QtOpenGL")
+set(AM_MOC_OPTIONS "")
+set(AM_MOC_RELAXED_MODE "")
+set(AM_MOC_MACRO_NAMES "Q_OBJECT;Q_GADGET;Q_NAMESPACE")
+set(AM_MOC_DEPEND_FILTERS "")
+set(AM_MOC_PREDEFS_CMD "/usr/bin/c++;-dM;-E;-c;/usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp")
+# UIC settings
+set(AM_UIC_SKIP "")
+set(AM_UIC_TARGET_OPTIONS "")
+set(AM_UIC_OPTIONS_FILES "")
+set(AM_UIC_OPTIONS_OPTIONS "")
+set(AM_UIC_SEARCH_PATHS "")

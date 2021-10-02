@@ -39,3 +39,15 @@ index 2013d42..40173dc 100644
  
  void SplashScreen::finish(QWidget* mainWindow)
  {
+diff --git a/src/gui/ConfigurationDialog.cpp b/src/gui/ConfigurationDialog.cpp
+index 8130d94..da84d87 100644
+--- a/src/gui/ConfigurationDialog.cpp
++++ b/src/gui/ConfigurationDialog.cpp
+@@ -1132,6 +1132,7 @@ void ConfigurationDialog::updateConfigLabels()
+ 
+ void ConfigurationDialog::setDefaultViewOptions()
+ {
++	return;
+ 	QSettings* conf = StelApp::getInstance().getSettings();
+ 	Q_ASSERT(conf);
+ 
